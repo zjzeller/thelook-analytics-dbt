@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: >
+      One row per customer with at least one completed order: acquisition attributes,
+      lifetime orders and revenue, and a 90-day repeat flag that is null for customers
+      who have not yet had 90 days to return.
+    columns:
+      - name: user_id
+        description: Primary key.
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('stg_users')
+                field: user_id
+      - name: cohort_month
+        description: Month of the customer's first completed order.
+        tests:
+          - not_null
+      - name: lifetime_orders
+        tests:
+          - not_null
+      - name: repeated_within_90_days
+        description: True if the second order came within 90 days of the first; null if the customer is too new to judge.
+
+  - name: fct_cohort_retention
+    description: >
+      Monthly cohort retention. Grain is cohort_month x months_since_first_order.
+      Months where no one in a cohort ordered have no row.
+    columns:
+      - name: cohort_month
+        tests:
+          - not_null
+      - name: months_since_first_order
+        tests:
+          - not_null
+      - name: retention_rate
+        description: Share of the cohort with at least one order in that month.
+
+  - name: fct_repeat_rate_by_segment
+    description: 90-day repeat rate and average lifetime revenue by traffic source, first-order category, and age band.
+    columns:
+      - name: segment_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['traffic_source', 'first_order_category', 'age_band']

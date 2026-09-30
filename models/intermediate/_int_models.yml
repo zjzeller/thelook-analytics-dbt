@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: int_orders_with_revenue
+    description: >
+      One row per completed order (cancelled and returned excluded) with order revenue
+      and the customer's order sequence number. Limited to complete calendar months.
+    columns:
+      - name: order_id
+        description: Primary key.
+        tests:
+          - not_null
+          - unique
+      - name: customer_order_number
+        description: 1 for a customer's first completed order, 2 for the second, and so on.
+        tests:
+          - not_null
